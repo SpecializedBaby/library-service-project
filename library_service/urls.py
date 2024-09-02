@@ -23,5 +23,6 @@ from django.conf import settings
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/book/", include("book.urls", namespace="book")),
-    path("api/user/", include("user.urls", namespace="user"))
+    path("api/user/", include("user.urls", namespace="user")),
+    path("api/borrowing/", include("borrowing.urls", namespace="borrowing"))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
