@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "book",
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -111,6 +112,8 @@ REST_FRAMEWORK = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
+
+AUTH_USER_MODEL = "user.User"
 
 LANGUAGE_CODE = "en-us"
 
