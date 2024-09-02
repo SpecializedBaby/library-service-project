@@ -23,23 +23,24 @@ class Borrowing(models.Model):
     actual_return_date = models.DateTimeField(null=True, blank=True)
 
     def clean(self):
-        """Custom validation logic to ensure date constraints."""
-        if self.expected_return_date <= self.borrow_date:
-            raise ValidationError(
-                {
-                    "expected_return_date": _(
-                        "Expected return date must be after borrow date."
-                    )
-                }
-            )
-        if self.actual_return_date is not None <= self.borrow_date:
-            raise ValidationError(
-                {
-                    "actual_return_date": _(
-                        "Actual return date must be after borrow date."
-                    )
-                }
-            )
+        if self.borrow_date is not None:
+            """Custom validation logic to ensure date constraints."""
+            if self.expected_return_date <= self.borrow_date:
+                raise ValidationError(
+                    {
+                        "expected_return_date": _(
+                            "Expected return date must be after borrow date."
+                        )
+                    }
+                )
+            if self.actual_return_date is not None and self.actual_return_date <= self.borrow_date:
+                raise ValidationError(
+                    {
+                        "actual_return_date": _(
+                            "Actual return date must be after borrow date."
+                        )
+                    }
+                )
 
     def __str__(self):
         return f"{self.user} borrowed {self.book} on {self.borrow_date}"
