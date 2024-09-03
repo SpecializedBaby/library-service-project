@@ -3,8 +3,8 @@ from django.views import generic
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAdminUser
 
-from .models import Book
-from .serializers import BookSerializer
+from book.models import Book
+from book.serializers import BookSerializer
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -13,8 +13,12 @@ class BookViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["list"]:
-            self.permission_classes = [AllowAny, ]
+            self.permission_classes = [
+                AllowAny,
+            ]
         else:
-            self.permission_classes = [IsAdminUser, ]
+            self.permission_classes = [
+                IsAdminUser,
+            ]
 
         return super().get_permissions()

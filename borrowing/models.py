@@ -33,7 +33,10 @@ class Borrowing(models.Model):
                         )
                     }
                 )
-            if self.actual_return_date is not None and self.actual_return_date <= self.borrow_date:
+            if (
+                self.actual_return_date is not None
+                and self.actual_return_date <= self.borrow_date
+            ):
                 raise ValidationError(
                     {
                         "actual_return_date": _(

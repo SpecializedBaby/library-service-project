@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from borrowing.models import Borrowing
-from book.serializers import BookSerializer, BookDetailSerializer
+from book.serializers import BookDetailSerializer
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
