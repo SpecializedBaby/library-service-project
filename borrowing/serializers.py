@@ -3,11 +3,10 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from borrowing.models import Borrowing
-from book.serializers import BookSerializer
+from book.serializers import BookSerializer, BookDetailSerializer
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
-    book = BookSerializer()
 
     class Meta:
         model = Borrowing
@@ -19,7 +18,12 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "expected_return_date",
             "actual_return_date",
         )
-        read_only_fields = ("id", "borrow_date", "actual_return_date",)
+        read_only_fields = (
+            "id",
+            "user",
+            "borrow_date",
+            "actual_return_date",
+        )
 
     def validate(self, attrs):
         """
@@ -29,10 +33,14 @@ class BorrowingSerializer(serializers.ModelSerializer):
         book = attrs.get("book")
 
         if book.inventory <= 0:
-            raise serializers.ValidationError("The selected book is not available in the inventory.")
+            raise serializers.ValidationError(
+                "The selected book is not available in the inventory."
+            )
 
         if attrs.get("expected_return_date") <= timezone.now():
-            raise serializers.ValidationError("The expected return date must be in the future.")
+            raise serializers.ValidationError(
+                "The expected return date must be in the future."
+            )
 
         return attrs
 
@@ -41,10 +49,18 @@ class BorrowingSerializer(serializers.ModelSerializer):
         Custom create method to decrease inventory and attach the current user.
         """
 
-        book = validated_data["book"]
+        book = validated_data.pop("book")
         book.inventory -= 1
         book.save()
 
-        borrowing = Borrowing.objects.create(user=self.context["request"].user, **validated_data)
+        validated_data.pop("user", None)
+
+        borrowing = Borrowing.objects.create(
+            user=self.context["request"].user, book=book, **validated_data
+        )
 
         return borrowing
+
+
+class BorrowingListSerializer(BorrowingSerializer):
+    book = BookDetailSerializer(read_only=True)
