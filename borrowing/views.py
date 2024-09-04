@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import viewsets, mixins
+from borrowing.helpers import send_telegram_message
 
 from borrowing.models import Borrowing
 from borrowing.serializers import BorrowingSerializer, BorrowingListSerializer, BorrowingReturnSerializer
@@ -20,6 +21,7 @@ class BorrowingViewSet(
     permission_classes = [
         permissions.IsAuthenticated,
     ]
+    lookup_field = "id"
 
     @staticmethod
     def _params_to_ints(qs):
@@ -44,6 +46,25 @@ class BorrowingViewSet(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        borrowing = serializer.instance
+
+        # Prepare the notification message
+        message = (
+            f"New Borrowing Created:\n\n"
+            f"Book: {borrowing.book.title}\n"
+            f"User: {borrowing.user.email}\n"
+            f"Borrow Date: {borrowing.borrow_date}\n"
+            f"Expected Return Date: {borrowing.expected_return_date}"
+        )
+        send_telegram_message(message)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action in ["list"]:
