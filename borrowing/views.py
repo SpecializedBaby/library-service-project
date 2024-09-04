@@ -1,15 +1,19 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
+from rest_framework.exceptions import ValidationError
+from django.utils import timezone
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import viewsets, mixins
 
 from borrowing.models import Borrowing
-from borrowing.serializers import BorrowingSerializer, BorrowingListSerializer
+from borrowing.serializers import BorrowingSerializer, BorrowingListSerializer, BorrowingReturnSerializer
 
 
 class BorrowingViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     GenericViewSet,
 ):
     queryset = Borrowing.objects.all()
@@ -44,6 +48,26 @@ class BorrowingViewSet(
     def get_serializer_class(self):
         if self.action in ["list"]:
             self.serializer_class = BorrowingListSerializer
+        if self.action in ["update"]:
+            self.serializer_class = BorrowingReturnSerializer
         else:
             self.serializer_class = BorrowingSerializer
         return super().get_serializer_class()
+
+    def update(self, request, *args, **kwargs):
+        borrowing = self.get_object()
+
+        if borrowing.actual_return_date is not None:
+            raise ValidationError("This borrowing has already been returned.")
+
+        borrowing.actual_return_date = timezone.now()
+
+        book = borrowing.book
+        book.inventory += 1
+        book.save()
+
+        borrowing.save()
+
+        serializer = self.get_serializer(borrowing)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
