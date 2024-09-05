@@ -7,7 +7,11 @@ from rest_framework import viewsets, mixins
 from borrowing.helpers import send_telegram_message
 
 from borrowing.models import Borrowing
-from borrowing.serializers import BorrowingSerializer, BorrowingListSerializer, BorrowingReturnSerializer
+from borrowing.serializers import (
+    BorrowingSerializer,
+    BorrowingListSerializer,
+    BorrowingReturnSerializer,
+)
 
 
 class BorrowingViewSet(
@@ -21,7 +25,6 @@ class BorrowingViewSet(
     permission_classes = [
         permissions.IsAuthenticated,
     ]
-    lookup_field = "id"
 
     @staticmethod
     def _params_to_ints(qs):
@@ -64,7 +67,9 @@ class BorrowingViewSet(
         send_telegram_message(message)
 
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def get_serializer_class(self):
         if self.action in ["list"]:

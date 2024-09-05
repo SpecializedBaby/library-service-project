@@ -69,14 +69,19 @@ class BorrowingListSerializer(BorrowingSerializer):
 class BorrowingReturnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrowing
-        fields = ("id", "actual_return_date", )
-        read_only_fields = ("id", )
+        fields = (
+            "id",
+            "actual_return_date",
+        )
+        read_only_fields = ("id",)
 
     def validate(self, attrs):
         book = attrs.get("book")
 
         if self.instance.actual_return_date is not None:
-            raise serializers.ValidationError("This borrowing has already been returned.")
+            raise serializers.ValidationError(
+                "This borrowing has already been returned."
+            )
         return attrs
 
     def save(self, **kwargs):

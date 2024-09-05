@@ -10,7 +10,7 @@ def send_telegram_message(message: str) -> None:
     payload = {
         "chat_id": settings.TELEGRAM_CHAT_ID,
         "text": message,
-        "parse_mode": "HTML"  # Optional: Allows for message formatting using HTML tags
+        "parse_mode": "HTML",  # Optional: Allows for message formatting using HTML tags
     }
     response = requests.post(url, data=payload)
 
